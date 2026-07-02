@@ -219,6 +219,12 @@ TSX
 // snippets/sample.tsx
 ```
 
+CSS
+
+```css
+/* snippets/sample.css */
+```
+
 NIX
 
 ```nix

@@ -432,9 +432,12 @@ export function hello(): string {
 CSS
 
 ```css
+/* snippets/sample.css */
+
 .hello {
   
 }
+
 ```
 
 NIX

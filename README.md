@@ -123,6 +123,8 @@ enum SupportedFileType {
   ARDUINO = 'ino',
   JSX = 'jsx',
   TSX = 'tsx',
+  CSS = 'css',
+  NIX = 'nix',
 }
 ```
 

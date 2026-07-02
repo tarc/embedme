@@ -5,8 +5,7 @@
     default = "Hello World";
   };
   config.packages.default = pkgs.writeShellApplication {
-    text = ''
-      echo ${lib.escapeShellArg config.message}
-    '';
+    name = "hello-message";
+    text = "echo ${lib.escapeShellArg config.message}";
   };
 }

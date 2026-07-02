@@ -219,6 +219,12 @@ TSX
 // snippets/sample.tsx
 ```
 
+NIX
+
+```nix
+# snippets/sample.nix
+```
+
 ## Extension-less selection
 
 ```sh

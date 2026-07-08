@@ -4,13 +4,15 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { embedme, EmbedmeOptions, logBuilder } from './embedme.lib';
 import { compile } from 'gitignore-parser';
-import program from 'commander';
-import glob from 'glob';
+import { Command } from 'commander';
+import { hasMagic, sync as globSync } from 'glob';
 const pkg = require('../package.json');
+
+const program = new Command();
 
 program
   .version(pkg.version)
-  .arguments('[...files]')
+  .arguments('[files...]')
   .option('--verify', `Verify that running embedme would result in no changes. Useful for CI`)
   .option('--dry-run', `Run embedme as usual, but don't write`)
   .option(
@@ -22,16 +24,16 @@ program
   .option('--strip-embed-comment', `Remove the comments from the code fence. *Must* be run with --stdout flag`)
   .parse(process.argv);
 
-const { args: sourceFilesInput } = program;
+const sourceFilesInput = program.args;
 
-const options: EmbedmeOptions = (program as unknown) as EmbedmeOptions;
+const options: EmbedmeOptions = (program.opts() as unknown) as EmbedmeOptions;
 
 const log = logBuilder(options);
 const errorLog = logBuilder(options, true);
 
-let sourceFiles = sourceFilesInput.reduce<string[]>((files, file) => {
-  if (glob.hasMagic(file)) {
-    files.push(...glob.sync(file));
+let sourceFiles = sourceFilesInput.reduce<string[]>((files: string[], file: string) => {
+  if (hasMagic(file)) {
+    files.push(...globSync(file));
   } else {
     files.push(file);
   }
@@ -82,7 +84,7 @@ if (ignoreFile) {
   }
 }
 
-sourceFiles.forEach((source, i) => {
+sourceFiles.forEach((source: string, i: number) => {
   if (i > 0) {
     log(chalk => chalk.gray(`---`));
   }

@@ -2,10 +2,14 @@
 
 # compiled output
 /dist
+/dist-test
 /tmp
 /out-tsc
 # Only exists if Bazel was run
 /bazel-out
+
+# TypeScript
+*.tsbuildinfo
 
 # dependencies
 /node_modules

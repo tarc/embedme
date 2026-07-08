@@ -1,4 +1,4 @@
-import chalk, { Chalk } from 'chalk';
+import chalk, { ChalkInstance } from 'chalk';
 import { existsSync, readFileSync } from 'fs';
 import { relative, resolve } from 'path';
 
@@ -179,21 +179,22 @@ const filetypeCommentReaders: Record<CommentFamily, FilenameFromCommentReader> =
 };
 
 function lookupLanguageCommentFamily(fileType: SupportedFileType): CommentFamily | null {
-  return Object.values(CommentFamily)
+  const result = Object.values(CommentFamily)
     .filter(x => typeof x === 'number')
     .find((commentFamily: CommentFamily) => languageMap[commentFamily].includes(fileType));
+  return result ?? null;
 }
 
 // this somewhat convoluted type to generate logs is due to the requirement to be able to log colours to both stdout,
 // and stderr, so the appropriate chalk instance has to be injected.
-type LogConstructor = (chalk: Chalk) => string;
+type LogConstructor = (chalk: ChalkInstance) => string;
 
 export const logBuilder = (options: EmbedmeOptions, errorLog = false) => (logConstructor: LogConstructor) => {
   if (!options.silent) {
     if (errorLog || options.stdout) {
       // as we're putting the resulting file out of stdout, we redirect the logs to stderr so they can still be seen,
       // but won't be piped
-      console.error(logConstructor(chalk.stderr));
+      console.error(logConstructor(chalk));
     } else {
       console.log(logConstructor(chalk));
     }

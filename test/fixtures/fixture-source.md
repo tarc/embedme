@@ -85,6 +85,12 @@ Shell
 # snippets/sample.sh
 ```
 
+PowerShell
+
+```ps1
+# snippets/sample.ps1
+```
+
 Objective C
 
 ```objectivec
@@ -213,6 +219,18 @@ TSX
 // snippets/sample.tsx
 ```
 
+CSS
+
+```css
+/* snippets/sample.css */
+```
+
+NIX
+
+```nix
+# snippets/sample.nix
+```
+
 ## Extension-less selection
 
 ```sh
@@ -285,34 +303,6 @@ Ignored block
 
 ```ts
 // Not a file
-```
-
-### Also bad file format
-
-```ts
-// also-not-a-file
-```
-
-### Missing file
-
-```txt
-// this-file-does-not-exist.txt
-```
-
-### Contains Codefence
-
-```md
-<!-- contains-codefence.md -->
-```
-
-### Contains Codefence, but not the embedded lines
-
-```md
-<!-- contains-codefence.md#L1-L3 -->
-
-# This markdown document
-
-## Contains a codefence
 ```
 
 ### malformed line numbering

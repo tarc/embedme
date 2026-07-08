@@ -60,6 +60,7 @@ enum SupportedFileType {
   PYTHON = 'py',
   BASH = 'bash',
   SHELL = 'sh',
+  POWERSHELL = 'ps1',
   GOLANG = 'go',
   OBJECTIVE_C = 'objectivec',
   PHP = 'php',
@@ -78,6 +79,8 @@ enum SupportedFileType {
   ARDUINO = 'ino',
   JSX = 'jsx',
   TSX = 'tsx',
+  CSS = 'css',
+  NIX = 'nix',
 }
 
 enum CommentFamily {
@@ -88,7 +91,13 @@ enum CommentFamily {
   SINGLE_QUOTE,
   DOUBLE_PERCENT,
   DOUBLE_HYPHENS,
+  SLASH_ASTERISK,
 }
+
+type Replacement = {
+  text: string;
+  error: boolean;
+};
 
 const languageMap: Record<CommentFamily, SupportedFileType[]> = {
   [CommentFamily.NONE]: [SupportedFileType.JSON],
@@ -120,14 +129,17 @@ const languageMap: Record<CommentFamily, SupportedFileType[]> = {
     SupportedFileType.PYTHON,
     SupportedFileType.BASH,
     SupportedFileType.SHELL,
+    SupportedFileType.POWERSHELL,
     SupportedFileType.YAML,
     SupportedFileType.RUBY,
     SupportedFileType.CRYSTAL,
     SupportedFileType.CMAKE,
+    SupportedFileType.NIX,
   ],
   [CommentFamily.SINGLE_QUOTE]: [SupportedFileType.PLANT_UML],
   [CommentFamily.DOUBLE_PERCENT]: [SupportedFileType.MERMAID],
   [CommentFamily.DOUBLE_HYPHENS]: [SupportedFileType.SQL, SupportedFileType.HASKELL],
+  [CommentFamily.SLASH_ASTERISK]: [SupportedFileType.CSS]
 };
 
 const leadingSymbol = (symbol: string): FilenameFromCommentReader => line => {
@@ -156,6 +168,14 @@ const filetypeCommentReaders: Record<CommentFamily, FilenameFromCommentReader> =
   [CommentFamily.SINGLE_QUOTE]: leadingSymbol(`'`),
   [CommentFamily.DOUBLE_PERCENT]: leadingSymbol('%%'),
   [CommentFamily.DOUBLE_HYPHENS]: leadingSymbol('--'),
+  [CommentFamily.SLASH_ASTERISK]: line => {
+    const match = line.match(/\/\*\s*?(\S*?)\s*?\*\//);
+    if (!match) {
+      return null;
+    }
+
+    return match[1];
+  },
 };
 
 function lookupLanguageCommentFamily(fileType: SupportedFileType): CommentFamily | null {
@@ -188,12 +208,13 @@ function getReplacement(
   substr: string,
   leadingSpaces: string,
   lineEnding: string,
+  infoString: string,
   codeExtension: SupportedFileType,
   firstLine: string,
   startLineNumber: number,
   ignoreNext: boolean,
   commentEmbedOverrideFilepath?: string,
-): string {
+): Replacement {
   /**
    * Re-declare the log class, prefixing each snippet with the file and line number
    * Note that we couldn't have derived the line count in the parent regex matcher, as we don't yet know how long the
@@ -212,7 +233,7 @@ function getReplacement(
 
   if (ignoreNext) {
     log({ returnSnippet: substr }, chalk => chalk.blue(`"Ignore next" comment detected, skipping code block...`));
-    return substr;
+    return { text: substr, error: false };
   }
 
   let commentedFilename: string | null;
@@ -221,14 +242,14 @@ function getReplacement(
   } else {
     if (!codeExtension) {
       log({ returnSnippet: substr }, chalk => chalk.blue(`No code extension detected, skipping code block...`));
-      return substr;
+      return { text: substr, error: false };
     }
 
     if (!firstLine) {
       log({ returnSnippet: substr }, chalk =>
         chalk.blue(`Code block is empty & no preceding embedme comment, skipping...`),
       );
-      return substr;
+      return { text: substr, error: false };
     }
 
     const supportedFileTypes: SupportedFileType[] = Object.values(SupportedFileType).filter(x => typeof x === 'string');
@@ -241,7 +262,7 @@ function getReplacement(
           )}, skipping code block`,
         ),
       );
-      return substr;
+      return { text: substr, error: false };
     }
 
     const languageFamily: CommentFamily | null = lookupLanguageCommentFamily(codeExtension);
@@ -254,7 +275,7 @@ function getReplacement(
           )} marked as supported, but comment family could not be determined. Please report this issue.`,
         ),
       );
-      return substr;
+      return { text: substr, error: false };
     }
 
     commentedFilename = filetypeCommentReaders[languageFamily](firstLine);
@@ -264,14 +285,14 @@ function getReplacement(
     log({ returnSnippet: substr }, chalk =>
       chalk.gray(`No comment detected in first line for block with extension ${codeExtension}`),
     );
-    return substr;
+    return { text: substr, error: false };
   }
 
   const matches = commentedFilename.match(/\s?(\S+?)((#L(\d+)-L(\d+))|$)/m);
 
   if (!matches) {
     log({ returnSnippet: substr }, chalk => chalk.gray(`No file found in embed line`));
-    return substr;
+    return { text: substr, error: false };
   }
 
   const [, filename, , lineNumbering, startLine, endLine] = matches;
@@ -283,7 +304,7 @@ function getReplacement(
         )}, Expecting Github formatting e.g. #L10-L20`,
       ),
     );
-    return substr;
+    return { text: substr, error: false };
   }
 
   const relativePath = options.sourceRoot
@@ -298,7 +319,7 @@ function getReplacement(
         )} in comment in first line, but file does not exist at ${chalk.underline(relativePath)}!`,
       ),
     );
-    return substr;
+    return { text: substr, error: true };
   }
 
   const file = readFileSync(relativePath, 'utf8');
@@ -338,13 +359,13 @@ function getReplacement(
         )} contains a code fence. Refusing to embed as that would break the document`,
       ),
     );
-    return substr;
+    return { text: substr, error: false };
   }
 
   let replacement =
     !!commentEmbedOverrideFilepath || options.stripEmbedComment
-      ? `\`\`\`${codeExtension}${lineEnding}${outputCode}${lineEnding}\`\`\``
-      : `\`\`\`${codeExtension}${lineEnding}${firstLine.trim()}${lineEnding}${lineEnding}${outputCode}${lineEnding}\`\`\``;
+      ? `\`\`\`${infoString}${lineEnding}${outputCode}${lineEnding}\`\`\``
+      : `\`\`\`${infoString}${lineEnding}${firstLine.trim()}${lineEnding}${lineEnding}${outputCode}${lineEnding}\`\`\``;
 
   if (leadingSpaces.length) {
     replacement = replacement
@@ -355,12 +376,12 @@ function getReplacement(
 
   if (replacement === substr) {
     log({ returnSnippet: substr }, chalk => chalk.gray(`No changes required, already up to date`));
-    return substr;
+    return { text: substr, error: false };
   }
 
   if (replacement.slice(0, -3).trimRight() === substr.slice(0, -3).trimRight()) {
     log({ returnSnippet: substr }, chalk => chalk.gray(`Changes are trailing whitespace only, ignoring`));
-    return substr;
+    return { text: substr, error: false };
   }
 
   const chalkColour = options.verify ? 'yellow' : 'green';
@@ -373,7 +394,7 @@ function getReplacement(
     ),
   );
 
-  return replacement;
+  return { text: replacement, error: false };
 }
 
 function getLineNumber(text: string, index: number, lineEnding: string): number {
@@ -386,7 +407,11 @@ function detectLineEnding(sourceText: string): string {
   return rexp.test(sourceText) ? '\r\n' : '\n';
 }
 
-export function embedme(sourceText: string, inputFilePath: string, options: EmbedmeOptions): string {
+export function embedme(
+  sourceText: string,
+  inputFilePath: string,
+  options: EmbedmeOptions,
+): { outText: string; error: boolean } {
   const log = logBuilder(options);
 
   log(chalk => chalk.magenta(`  Analysing ${chalk.underline(relative(process.cwd(), inputFilePath))}...`));
@@ -406,13 +431,15 @@ export function embedme(sourceText: string, inputFilePath: string, options: Embe
   let previousEnd = 0;
 
   let result: RegExpExecArray | null;
+  let replacementError = false;
   while ((result = codeFenceFinder.exec(sourceText)) !== null) {
     const [codeFence, leadingSpaces] = result;
     const start = sourceText.substring(previousEnd, result.index);
 
-    const extensionMatch = codeFence.match(/```(.*)/);
+    const infoStringMatch = codeFence.match(/```(.*)/);
 
-    const codeExtension = extensionMatch ? extensionMatch[1] : null;
+    const infoString = infoStringMatch ? infoStringMatch[1] : '';
+    const codeExtension = infoString !== '' ? infoString.trim().split(/\s/)[0] : null;
     const splitFence = codeFence.split(lineEnding);
     const firstLine = splitFence.length >= 3 ? splitFence[1] : null;
 
@@ -432,13 +459,14 @@ export function embedme(sourceText: string, inputFilePath: string, options: Embe
 
     const commentInsertion = start.match(/<!--\s*?embedme[ ]+?(\S+?)\s*?-->/);
 
-    const replacement = getReplacement(
+    const { text, error } = getReplacement(
       inputFilePath,
       options,
       log,
       codeFence,
       leadingSpaces,
       lineEnding,
+      infoString,
       codeExtension as SupportedFileType,
       firstLine || '',
       startLineNumber,
@@ -446,9 +474,16 @@ export function embedme(sourceText: string, inputFilePath: string, options: Embe
       commentInsertion ? commentInsertion[1] : undefined,
     );
 
-    docPartials.push(start, replacement);
+    if (error) {
+      replacementError = true;
+    }
+
+    docPartials.push(start, text);
     previousEnd = codeFenceFinder.lastIndex;
   }
 
-  return [...docPartials].join('') + sourceText.substring(previousEnd);
+  return {
+    outText: [...docPartials].join('') + sourceText.substring(previousEnd),
+    error: replacementError,
+  };
 }

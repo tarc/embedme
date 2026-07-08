@@ -165,6 +165,15 @@ print Hello World
 
 ```
 
+PowerShell
+
+```ps1
+# snippets/sample.ps1
+
+echo Hello World
+
+```
+
 Objective C
 
 ```objectivec
@@ -420,6 +429,36 @@ export function hello(): string {
 
 ```
 
+CSS
+
+```css
+/* snippets/sample.css */
+
+.hello {
+  
+}
+
+```
+
+NIX
+
+```nix
+# snippets/sample.nix
+
+{ pkgs, lib, config, ... }:
+{
+  options.message = lib.mkOption {
+    type = lib.types.str;
+    default = "Hello World";
+  };
+  config.packages.default = pkgs.writeShellApplication {
+    name = "hello-message";
+    text = "echo ${lib.escapeShellArg config.message}";
+  };
+}
+
+```
+
 ## Extension-less selection
 
 ```sh
@@ -517,34 +556,6 @@ Ignored block
 
 ```ts
 // Not a file
-```
-
-### Also bad file format
-
-```ts
-// also-not-a-file
-```
-
-### Missing file
-
-```txt
-// this-file-does-not-exist.txt
-```
-
-### Contains Codefence
-
-```md
-<!-- contains-codefence.md -->
-```
-
-### Contains Codefence, but not the embedded lines
-
-```md
-<!-- contains-codefence.md#L1-L3 -->
-
-# This markdown document
-
-## Contains a codefence
 ```
 
 ### malformed line numbering

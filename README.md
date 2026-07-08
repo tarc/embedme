@@ -1,5 +1,8 @@
 # EmbedMe
 
+> [!NOTE]
+> This is a fork of the original [embedme](https://github.com/zakhenry/embedme) project. For the differences between this and the original, see the [comparison](#comparison) section.
+
 Simple utility to embed source files into markdown code blocks <sup>[why tho?](#why)</sup>
 
 [![npm version](https://badge.fury.io/js/embedme.svg)](https://www.npmjs.com/package/embedme)
@@ -7,6 +10,15 @@ Simple utility to embed source files into markdown code blocks <sup>[why tho?](#
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://commitizen.github.io/cz-cli/)
 
 ![Demo](readme/asciinema/demo.svg)
+
+## Comparison
+
+At the moment the only differences are the application of these pending PRs:
+- [Add support to the Nix language and missing CSS test cases](https://github.com/zakhenry/embedme/pull/112)
+  - Local PR (completed): https://github.com/tarc/embedme/pull/1
+  - Local feature branch (merged): https://github.com/tarc/embedme/tree/feature/add-nix-main
+  - Upstream PR (pending): https://github.com/zakhenry/embedme/pull/112
+  - Upstream feature branch (pending): https://github.com/tarc/embedme/tree/feature/add-nix
 
 ## Usage
 
@@ -83,7 +95,7 @@ Here's a list of file types supported by this utility, if you have a need for an
 contribute, it is easy!
 
 ```ts
-// src/embedme.lib.ts#L44-L82
+// src/embedme.lib.ts#L44-L84
 
 enum SupportedFileType {
   PLAIN_TEXT = 'txt',
@@ -104,6 +116,7 @@ enum SupportedFileType {
   PYTHON = 'py',
   BASH = 'bash',
   SHELL = 'sh',
+  POWERSHELL = 'ps1',
   GOLANG = 'go',
   OBJECTIVE_C = 'objectivec',
   PHP = 'php',
@@ -122,6 +135,8 @@ enum SupportedFileType {
   ARDUINO = 'ino',
   JSX = 'jsx',
   TSX = 'tsx',
+  CSS = 'css',
+  NIX = 'nix',
 }
 ```
 

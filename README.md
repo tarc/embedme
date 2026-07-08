@@ -140,7 +140,7 @@ enum SupportedFileType {
   TSX = 'tsx',
   CSS = 'css',
   NIX = 'nix',
-}
+  OCAML = 'ml',
 ```
 
 ### Alternate embedding syntax

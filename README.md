@@ -13,7 +13,7 @@ Simple utility to embed source files into markdown code blocks <sup>[why tho?](#
 
 ## Comparison
 
-At the moment the differences are the application of these pending PRs and dependencies updates:
+At the moment the differences are the application of these pending upstream PRs and dependency updates:
 - [Add support to the Nix language and missing CSS test cases](https://github.com/zakhenry/embedme/pull/112)
   - Local PR (completed): https://github.com/tarc/embedme/pull/1
   - Local feature branch (merged): https://github.com/tarc/embedme/tree/feature/add-nix-main
@@ -21,7 +21,7 @@ At the moment the differences are the application of these pending PRs and depen
   - Upstream feature branch (pending): https://github.com/tarc/embedme/tree/feature/add-nix
 - All dependabot PRs to https://github.com/zakhenry/embedme that could be applied.
 - [Update project dependencies](https://github.com/tarc/embedme/pull/20)
-- [Feat/add OCaml language support](https://github.com/zakhenry/embedme/pull/58)
+- [Add OCaml support](https://github.com/tarc/embedme/pull/22)
 
 ## Usage
 

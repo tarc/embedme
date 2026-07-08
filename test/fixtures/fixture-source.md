@@ -231,6 +231,12 @@ NIX
 # snippets/sample.nix
 ```
 
+OCaml
+
+```ml
+(* snippets/sample.ml *)
+```
+
 ## Extension-less selection
 
 ```sh

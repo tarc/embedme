@@ -81,6 +81,7 @@ enum SupportedFileType {
   TSX = 'tsx',
   CSS = 'css',
   NIX = 'nix',
+  OCAML = 'ml',
 }
 
 enum CommentFamily {
@@ -92,6 +93,7 @@ enum CommentFamily {
   DOUBLE_PERCENT,
   DOUBLE_HYPHENS,
   SLASH_ASTERISK,
+  PARENTHESIS_ASTERISK,
 }
 
 type Replacement = {
@@ -139,7 +141,8 @@ const languageMap: Record<CommentFamily, SupportedFileType[]> = {
   [CommentFamily.SINGLE_QUOTE]: [SupportedFileType.PLANT_UML],
   [CommentFamily.DOUBLE_PERCENT]: [SupportedFileType.MERMAID],
   [CommentFamily.DOUBLE_HYPHENS]: [SupportedFileType.SQL, SupportedFileType.HASKELL],
-  [CommentFamily.SLASH_ASTERISK]: [SupportedFileType.CSS]
+  [CommentFamily.SLASH_ASTERISK]: [SupportedFileType.CSS],
+  [CommentFamily.PARENTHESIS_ASTERISK]: [SupportedFileType.OCAML]
 };
 
 const leadingSymbol = (symbol: string): FilenameFromCommentReader => line => {
@@ -170,6 +173,14 @@ const filetypeCommentReaders: Record<CommentFamily, FilenameFromCommentReader> =
   [CommentFamily.DOUBLE_HYPHENS]: leadingSymbol('--'),
   [CommentFamily.SLASH_ASTERISK]: line => {
     const match = line.match(/\/\*\s*?(\S*?)\s*?\*\//);
+    if (!match) {
+      return null;
+    }
+
+    return match[1];
+  },
+  [CommentFamily.PARENTHESIS_ASTERISK]: line => {
+    const match = line.match(/\(\*\s*?(\S*?)\s*?\*\)/);
     if (!match) {
       return null;
     }

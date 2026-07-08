@@ -459,6 +459,15 @@ NIX
 
 ```
 
+OCaml
+
+```ml
+(* snippets/sample.ml *)
+
+let hello () = ("Hello, World!" : string)
+
+```
+
 ## Extension-less selection
 
 ```sh

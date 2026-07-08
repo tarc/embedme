@@ -9,10 +9,12 @@
   "bin": "./dist/embedme.js",
   "scripts": {
     "build": "tsc",
+    "build:test": "tsc -p tsconfig.test.json",
+    "pretest": "yarn build && yarn build:test",
     "write-help-output": "echo \"$ embedme --help\" > readme/help-output.txt && node dist/embedme.js --help >> readme/help-output.txt",
     "start": "node dist/embedme.js README.md",
-    "test": "ava test/test.ts",
-    "test:update": "ava test/test.ts --update-snapshots",
+    "test": "ava dist-test/test.js",
+    "test:update": "ava dist-test/test.js --update-snapshots",
     "commit": "git add . && git-cz",
     "------------------ LINT COMMANDS -----------------": "",
     "prettier": "prettier",
@@ -28,13 +30,16 @@
     "@semantic-release/github": "5.5.5"
   },
   "devDependencies": {
-    "@types/node": "12.0.8",
-    "ava": "2.4.0",
-    "cz-conventional-changelog": "2.1.0",
-    "prettier": "1.18.2",
-    "semantic-release": "17.2.3",
-    "ts-node": "8.5.4",
-    "typescript": "3.5.2"
+    "@ava/typescript": "^7.0.0",
+    "@types/node": "26.1.1",
+    "ava": "8.0.1",
+    "cz-conventional-changelog": "3.3.0",
+    "prettier": "3.9.4",
+    "semantic-release": "25.0.5",
+    "ts-node": "10.9.2",
+    "tsimp": "^2.0.12",
+    "tsx": "^4.23.0",
+    "typescript": "7.0.2"
   },
   "config": {
     "commitizen": {
@@ -42,18 +47,12 @@
     }
   },
   "dependencies": {
-    "chalk": "3.0.0",
-    "commander": "5.1.0",
+    "@semantic-release/github": "12.0.9",
+    "chalk": "5.6.2",
+    "commander": "15.0.0",
     "gitignore-parser": "~0.0.2",
-    "glob": "~7.1.4"
+    "glob": "~13.0.6"
   },
   "ava": {
-    "compileEnhancements": false,
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ]
   }
 }
